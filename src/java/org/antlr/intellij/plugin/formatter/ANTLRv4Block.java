@@ -11,6 +11,7 @@ import com.intellij.psi.TokenType;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.formatter.common.AbstractBlock;
 import com.intellij.psi.tree.IElementType;
+import org.antlr.intellij.plugin.ANTLRv4Language;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,8 +21,6 @@ import java.util.List;
 import static org.antlr.intellij.plugin.ANTLRv4TokenTypes.*;
 
 public class ANTLRv4Block extends AbstractBlock {
-
-    private SpacingBuilder spacingBuilder;
 
     @NotNull
     private final ASTNode myNode;
@@ -34,7 +33,7 @@ public class ANTLRv4Block extends AbstractBlock {
     @NotNull
     private final CodeStyleSettings mySettings;
     @NotNull
-    private final SpacingBuilder mySpacingBuilder;
+    private final SpacingBuilder spacingBuilder;
     @Nullable
     private List<Block> mySubBlocks;
 
@@ -48,7 +47,6 @@ public class ANTLRv4Block extends AbstractBlock {
         this.myIndent = indent;
         this.myWrap = wrap;
         this.mySettings = settings;
-        this.mySpacingBuilder = spacingBuilder;
         this.spacingBuilder = spacingBuilder;
     }
 
@@ -63,32 +61,46 @@ public class ANTLRv4Block extends AbstractBlock {
             if (childElementType != TokenType.WHITE_SPACE) {
                 Indent indent = Indent.getNoneIndent();
                 if (childElementType == LEXER_RULE_BLOCK) {
-
-                    ASTNode blockChild = child.getFirstChildNode().getFirstChildNode();
-
-                    while (blockChild != null) {
-                        IElementType blockChildElementType = blockChild.getElementType();
-                        if (blockChildElementType != TokenType.WHITE_SPACE) {
-
-                            Indent blockIndent = Indent.getNoneIndent();
-
-                            if (blockChildElementType == OR) {
-                                blockIndent = Indent.getSpaceIndent(4);
-                            }
-                            Block block = new ANTLRv4Block(
-                                    blockChild, Alignment.createAlignment(), blockIndent, null, mySettings,
-                                    mySpacingBuilder
-                            );
-                            blocks.add(block);
-                        }
-                        blockChild = blockChild.getTreeNext();
-                    }
-
+                    //
+                    //                    ASTNode blockChild = child.getFirstChildNode().getFirstChildNode();
+                    //
+                    //                    //                    Block block = new ANTLRv4Block(
+                    //                    //                            blockChild, Alignment.createAlignment(),
+                    // null, null,
+                    //                    //                            mySettings, spacingBuilder
+                    //                    //                    );
+                    //                    //                    blocks.add(block);
+                    //                    while (blockChild != null) {
+                    //                        IElementType blockChildElementType = blockChild
+                    //                                .getElementType();
+                    //                        if (blockChildElementType != TokenType.WHITE_SPACE) {
+                    //
+                    //                            Indent blockIndent = Indent.getNoneIndent();
+                    //
+                    //                            if (blockChildElementType == OR) {
+                    //                                blockIndent = Indent.getSpaceIndent(4);
+                    //                            }
+                    //                            Block block = new ANTLRv4Block(
+                    //                                    blockChild, Alignment.createAlignment(),
+                    //                                    null, null,
+                    //                                    mySettings, spacingBuilder
+                    //                            );
+                    //                            blocks.add(block);
+                    //                        }
+                    //                        blockChild = blockChild.getTreeNext();
+                    //                    }
+                    Block block = new ANTLRv4LexerRuleBlock(
+                            child, null, null, null, mySettings, createSpaceBuilder(mySettings)
+                    );
+                    blocks.add(block);
                 } else {
                     if (parentElementType == LEXER_RULE) {
                         if (childElementType == COLON || childElementType == SEMI) {
                             indent = Indent.getSpaceIndent(4);
                         }
+                    }
+                    if (childElementType == ID_LIST) {
+                        indent = Indent.getSpaceIndent(4);
                     }
                     Block block = new ANTLRv4Block(
                             child, Alignment.createAlignment(), indent, null, mySettings, spacingBuilder
@@ -99,6 +111,48 @@ public class ANTLRv4Block extends AbstractBlock {
             child = child.getTreeNext();
         }
         return blocks;
+    }
+
+    private static SpacingBuilder createSpaceBuilder(CodeStyleSettings settings) {
+        return new SpacingBuilder(settings, ANTLRv4Language.INSTANCE)
+                //                .after(GRAMMAR_TYPE).spaceIf(true)
+                //                .withinPairInside(ID, SEMI, GRAMMAR_SPEC).spaceIf(false)
+                //                .before(TOKEN_REF).spaceIf(false)
+                //                .after(TOKEN_REF).lineBreakInCode()
+                //                .after(LEXER_RULE_BLOCK).lineBreakInCode()
+                //                .beforeInside(SEMI, LEXER_RULE).spaces(4)
+                //                .between(COLON, LEXER_RULE_BLOCK).spaces(4)
+                //                .between(COLON, LEXER_ALT_LIST).spaces(4)
+                //                //                .between(OR, LEXER_RULE_BLOCK).spaces(4)
+                //                //                .between(OR, LEXER_ALT_LIST).spaces(4)
+
+
+                //                .before(LPAREN).lineBreakInCode()
+                //                .before(RPAREN).lineBreakInCode()
+                //                .before(OR).lineBreakInCode()
+                //                .between(OR, LEXER_ALT).spaces(4)
+
+
+                .around(LEXER_ELEMENT).spaceIf(true)
+                .around(LEXER_ALT_LIST).spaceIf(false)
+                .around(LEXER_COMMAND_EXPRESSION).spaceIf(false)
+                .after(LEXER_COMMAND_NAME).spaceIf(false)
+                .aroundInside(OR, LEXER_ALT_LIST).spaceIf(true)
+                .before(LEXER_ALT).spaces(4)
+                //                .beforeInside(OR, LEXER_ALT_LIST).lineBreakInCode()
+
+                //                .around(OR).spaceIf(true)
+                //                .around(LEXER_ELEMENT).spaceIf(true)
+                //
+                //                .beforeInside(OR, LEXER_RULE_BLOCK).spaces(0)
+                //
+                //                .before(RULES).blankLines(1)
+                //                .after(RULES).blankLines(1)
+                //
+                //                .before(RULE_SPEC).blankLines(1)
+                //                .after(RULE_SPEC).blankLines(1)
+
+                ;
     }
 
     @Override

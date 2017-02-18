@@ -49,6 +49,8 @@ public class ANTLRv4TokenTypes {
     public static final TokenElementType SEMI = getTokenElementType(ANTLRv4Lexer.SEMI);
     public static final TokenElementType OR = getTokenElementType(ANTLRv4Lexer.OR);
     public static final TokenElementType TOKEN_REF = getTokenElementType(ANTLRv4Lexer.TOKEN_REF);
+    public static final TokenElementType LPAREN = getTokenElementType(ANTLRv4Lexer.LPAREN);
+    public static final TokenElementType RPAREN = getTokenElementType(ANTLRv4Lexer.RPAREN);
 
     public static final RuleElementType ID = getRuleElementType(ANTLRv4Parser.RULE_id);
     public static final RuleElementType GRAMMAR_SPEC = getRuleElementType(ANTLRv4Parser.RULE_grammarSpec);
@@ -60,12 +62,18 @@ public class ANTLRv4TokenTypes {
     public static final RuleElementType LEXER_ALT_LIST = getRuleElementType(ANTLRv4Parser.RULE_lexerAltList);
     public static final RuleElementType LEXER_ALT = getRuleElementType(ANTLRv4Parser.RULE_lexerAlt);
     public static final RuleElementType LEXER_ELEMENT = getRuleElementType(ANTLRv4Parser.RULE_lexerElement);
+    public static final RuleElementType ID_LIST = getRuleElementType(ANTLRv4Parser.RULE_idList);
+    public static final RuleElementType LEXER_COMMAND_EXPRESSION = getRuleElementType(
+            ANTLRv4Parser.RULE_lexerCommandExpr);
+    public static final RuleElementType LEXER_COMMAND_NAME = getRuleElementType(ANTLRv4Parser.RULE_lexerCommandName);
 
-    public static RuleElementType getRuleElementType(@MagicConstant(valuesFromClass = ANTLRv4Parser.class) int ruleIndex) {
+    public static RuleElementType getRuleElementType(@MagicConstant(valuesFromClass = ANTLRv4Parser.class) int
+                                                             ruleIndex) {
         return RULE_ELEMENT_TYPES.get(ruleIndex);
     }
 
-    public static TokenElementType getTokenElementType(@MagicConstant(valuesFromClass = ANTLRv4Lexer.class) int ruleIndex) {
+    public static TokenElementType getTokenElementType(@MagicConstant(valuesFromClass = ANTLRv4Lexer.class) int
+                                                               ruleIndex) {
         return TOKEN_ELEMENT_TYPES.get(ruleIndex);
     }
 }
